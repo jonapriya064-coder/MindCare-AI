@@ -1,0 +1,215 @@
+{% extends "layout.html" %}
+{% block title %}Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+.chart-card { background: var(--card-bg); border: none; border-radius: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1"><i class="bi bi-bar-chart-line text-primary me-2"></i>Mood Analytics</h3>
+        <p class="text-muted">Visual insights into your emotional patterns and trends.</p>
+    </div>
+
+    {% set total = emotion_counts.values()|sum %}
+    {% if total == 0 %}
+    <div class="text-center py-5">
+        <div style="font-size:4rem">📊</div>
+        <h4 class="fw-bold mt-3">No Data Yet</h4>
+        <p class="text-muted">Start logging your moods to see beautiful analytics here.</p>
+        <a href="{{ url_for('analyze') }}" class="btn btn-primary rounded-pill px-5">
+            <i class="bi bi-plus me-2"></i>Log Your First Mood
+        </a>
+    </div>
+
+    {% else %}
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        {% set dominant = emotion_counts.items()|sort(attribute='1', reverse=True)|first %}
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-primary bg-opacity-10">
+                <div class="stat-card-icon text-primary"><i class="bi bi-collection"></i></div>
+                <div class="stat-card-value text-primary">{{ total }}</div>
+                <div class="stat-card-label">Total Entries</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-success bg-opacity-10">
+                <div class="stat-card-icon text-success"><i class="bi bi-emoji-smile"></i></div>
+                <div class="stat-card-value text-success">{{ emotion_counts['happy'] }}</div>
+                <div class="stat-card-label">Happy Moments</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-warning bg-opacity-10">
+                <div class="stat-card-icon text-warning"><i class="bi bi-graph-up"></i></div>
+                <div class="stat-card-value text-warning">{{ emotion_data[dominant[0]]['emoji'] }}</div>
+                <div class="stat-card-label">Dominant Mood</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-info bg-opacity-10">
+                <div class="stat-card-icon text-info"><i class="bi bi-percent"></i></div>
+                <div class="stat-card-value text-info">
+                    {{ ((emotion_counts['happy'] / total) * 100)|round|int }}%
+                </div>
+                <div class="stat-card-label">Positivity Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Pie Chart -->
+        <div class="col-lg-5">
+            <div class="chart-card p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i>Emotion Distribution</h6>
+                <canvas id="pieChart" height="250"></canvas>
+            </div>
+        </div>
+        <!-- Bar Chart -->
+        <div class="col-lg-7">
+            <div class="chart-card p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2 text-success"></i>Emotion Count by Type</h6>
+                <canvas id="barChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Trend -->
+    <div class="chart-card p-4 mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-graph-up me-2 text-info"></i>Last 7 Days Trend</h6>
+        <canvas id="weeklyChart" height="100"></canvas>
+    </div>
+
+    <!-- Emotion Breakdown Table -->
+    <div class="chart-card p-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-table me-2 text-warning"></i>Emotion Breakdown</h6>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Emotion</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for em, count in emotion_counts.items()|sort(attribute='1', reverse=True) %}
+                    {% set info = emotion_data[em] %}
+                    {% set pct = ((count / total) * 100)|round(1) %}
+                    <tr>
+                        <td>
+                            <span class="me-2">{{ info.emoji }}</span>
+                            <span class="fw-semibold">{{ info.label }}</span>
+                        </td>
+                        <td>{{ count }}</td>
+                        <td>{{ pct }}%</td>
+                        <td style="width:40%">
+                            <div class="progress rounded-pill" style="height:8px">
+                                <div class="progress-bar rounded-pill" style="width:{{ pct }}%; background:{{ info.color }}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const emotionColors = {
+    happy: '#28a745', sad: '#6c757d', stress: '#fd7e14', angry: '#dc3545', neutral: '#17a2b8'
+};
+const emotionCounts = {{ emotion_counts | tojson }};
+const labels = Object.keys(emotionCounts).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+const values = Object.values(emotionCounts);
+const colors = Object.keys(emotionCounts).map(k => emotionColors[k]);
+
+// Pie Chart
+new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+        labels: labels,
+        datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom', labels: { padding: 15, usePointStyle: true } }
+        },
+        cutout: '60%'
+    }
+});
+
+// Bar Chart
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Times Recorded',
+            data: values,
+            backgroundColor: colors.map(c => c + 'CC'),
+            borderColor: colors,
+            borderWidth: 2,
+            borderRadius: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,.05)' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+
+// Weekly Line Chart
+const weeklyData = {{ weekly | tojson }};
+const dayMap = {};
+weeklyData.forEach(row => {
+    if (!dayMap[row.day]) dayMap[row.day] = {};
+    dayMap[row.day][row.emotion] = row.count;
+});
+const days = [...new Set(weeklyData.map(r => r.day))].sort();
+
+const weeklyDatasets = Object.keys(emotionColors).map(em => ({
+    label: em.charAt(0).toUpperCase() + em.slice(1),
+    data: days.map(d => dayMap[d]?.[em] || 0),
+    borderColor: emotionColors[em],
+    backgroundColor: emotionColors[em] + '30',
+    tension: 0.4,
+    fill: true,
+    pointRadius: 5,
+    pointHoverRadius: 7,
+}));
+
+new Chart(document.getElementById('weeklyChart'), {
+    type: 'line',
+    data: { labels: days, datasets: weeklyDatasets },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(0,0,0,.05)' } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+{% endblock %}
