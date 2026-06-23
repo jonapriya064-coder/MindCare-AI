@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% block title %}Analyze Mood{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <div style="font-size:3rem">🔍</div>
+                <h2 class="fw-bold mt-2">Analyze Your Emotions</h2>
+                <p class="text-muted">Express how you feel in your own words and let our AI understand your emotional state.</p>
+            </div>
+
+            <!-- Analysis Form -->
+            <div class="card border-0 shadow rounded-4 p-4">
+                <form method="POST" action="{{ url_for('analyze_result') }}" id="analyzeForm">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-6">
+                            <i class="bi bi-pencil-square text-primary me-2"></i>How are you feeling right now?
+                        </label>
+                        <textarea name="text" id="moodText" class="form-control rounded-3 custom-textarea"
+                            rows="5" maxlength="1000"
+                            placeholder="Example: I feel really stressed about my upcoming exams and I can't sleep properly..."
+                            required></textarea>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">Be as honest as you like — this is your safe space.</small>
+                            <small class="text-muted"><span id="charCount">0</span>/1000</small>
+                        </div>
+                    </div>
+
+                    <!-- Example prompts -->
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-semibold">Try an example:</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for example in [
+                                'I feel so happy and grateful today!',
+                                'I am stressed about my deadlines.',
+                                'I feel sad and lonely lately.',
+                                'I am really angry at the situation.',
+                                'Today was just a normal day.',
+                            ] %}
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill example-btn"
+                                onclick="setExample(this.dataset.text)" data-text="{{ example }}">
+                                {{ example[:30] }}{% if example|length > 30 %}...{% endif %}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Optional Journal -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-journal-text me-2 text-warning"></i>Add to Journal <span class="text-muted small">(optional)</span>
+                        </label>
+                        <textarea name="journal" class="form-control rounded-3"
+                            rows="2"
+                            placeholder="Add a brief note about your day or situation (optional)..."></textarea>
+                    </div>
+
+                    <!-- Save checkbox -->
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" name="save_mood" id="saveMood" checked>
+                        <label class="form-check-label fw-semibold" for="saveMood">
+                            <i class="bi bi-bookmark-check me-1 text-primary"></i>Save this mood to my history
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 btn-analyze" id="submitBtn">
+                        <i class="bi bi-search-heart me-2"></i>Analyze My Emotion
+                    </button>
+                </form>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="alert alert-warning mt-4 rounded-3 py-3 small">
+                <i class="bi bi-shield-exclamation me-2"></i>
+                <strong>Reminder:</strong> This tool provides AI-based emotion detection for educational purposes only.
+                It is <strong>not</strong> a clinical diagnosis. If you are experiencing a mental health crisis, 
+                please <a href="{{ url_for('emergency') }}" class="alert-link">seek professional help immediately</a>.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Character counter
+const textarea = document.getElementById('moodText');
+const counter = document.getElementById('charCount');
+textarea.addEventListener('input', () => {
+    counter.textContent = textarea.value.length;
+});
+
+// Example buttons
+function setExample(text) {
+    textarea.value = text;
+    counter.textContent = text.length;
+    textarea.focus();
+}
+
+// Loading state
+document.getElementById('analyzeForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}
