@@ -1,0 +1,243 @@
+{% extends "layout.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero Section ───────────────────────────────────────────────────── -->
+<section class="hero-section">
+    <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    <div class="container py-5">
+        <div class="row align-items-center min-vh-hero">
+            <div class="col-lg-6 text-white">
+                <div class="hero-badge mb-4 animate-fade-in">
+                    <span class="badge-dot"></span>
+                    AI-Powered Mental Wellness
+                </div>
+                <h1 class="hero-title animate-fade-in-up">
+                    Your Mind Deserves<br>
+                    <span class="hero-highlight">Compassionate</span> Care
+                </h1>
+                <p class="hero-subtitle animate-fade-in-up delay-1">
+                    MindCare AI helps you understand your emotions, track your mental wellness, 
+                    and build healthier habits — all with the power of Artificial Intelligence.
+                </p>
+                <div class="d-flex flex-wrap gap-3 animate-fade-in-up delay-2">
+                    <a href="{{ url_for('register') }}" class="btn btn-hero-primary btn-lg">
+                        <i class="bi bi-heart-pulse me-2"></i>Start Your Journey
+                    </a>
+                    <a href="#how-it-works" class="btn btn-hero-outline btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>See How It Works
+                    </a>
+                </div>
+                <div class="hero-stats mt-5 animate-fade-in-up delay-3">
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Emotions Detected</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number">AI</span>
+                        <span class="stat-label">Powered Analysis</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Private & Secure</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-flex justify-content-center animate-float">
+                <div class="hero-card-stack">
+                    <div class="hero-card hero-card-main">
+                        <div class="hc-header">
+                            <div class="hc-dot green"></div>
+                            <div class="hc-dot yellow"></div>
+                            <div class="hc-dot red"></div>
+                            <span class="ms-2 small text-muted">Emotion Analysis</span>
+                        </div>
+                        <div class="hc-body">
+                            <p class="hc-quote">"I feel calm and grateful today 🌿"</p>
+                            <div class="hc-result">
+                                <span class="hc-emoji">😊</span>
+                                <div>
+                                    <div class="hc-emotion">Happy</div>
+                                    <div class="hc-confidence">Confidence: 94%</div>
+                                </div>
+                            </div>
+                            <div class="hc-bar-wrap">
+                                <div class="hc-bar" style="width:94%; background: var(--color-success)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-card hero-card-secondary">
+                        <div class="d-flex align-items-center gap-2">
+                            <span>🧘</span>
+                            <span class="small fw-semibold">Wellness Tip</span>
+                        </div>
+                        <p class="small text-muted mt-1 mb-0">Try a 5-minute breathing exercise to start your day.</p>
+                    </div>
+                    <div class="hero-card hero-card-tertiary">
+                        <div class="d-flex align-items-center gap-2">
+                            <span>📊</span>
+                            <span class="small fw-semibold">Weekly Streak</span>
+                        </div>
+                        <div class="streak-dots mt-2">
+                            <span class="dot filled"></span><span class="dot filled"></span>
+                            <span class="dot filled"></span><span class="dot filled"></span>
+                            <span class="dot filled"></span><span class="dot"></span>
+                            <span class="dot"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Disclaimer Banner ──────────────────────────────────────────────── -->
+<div class="disclaimer-banner">
+    <div class="container text-center">
+        <i class="bi bi-shield-check me-2"></i>
+        <strong>Educational Tool Only</strong> — MindCare AI is not a substitute for professional mental health care. 
+        If you're in crisis, please <a href="{{ url_for('emergency') }}" class="fw-bold">contact emergency support</a>.
+    </div>
+</div>
+
+<!-- ── Features Section ───────────────────────────────────────────────── -->
+<section id="features" class="py-5 section-light">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="section-eyebrow">What We Offer</span>
+            <h2 class="section-title">Everything You Need for <span class="text-primary">Mental Wellness</span></h2>
+            <p class="section-subtitle">Comprehensive tools designed to support your emotional health journey.</p>
+        </div>
+        <div class="row g-4">
+            {% set features = [
+                ('🔍', 'Emotion Analysis', 'AI-powered text analysis detects your emotional state with confidence scoring.', 'primary'),
+                ('💬', 'Wellness Chatbot', 'Talk to our empathetic AI assistant anytime you need to express your feelings.', 'success'),
+                ('📊', 'Mood Analytics', 'Beautiful charts and trends to visualize your emotional patterns over time.', 'info'),
+                ('📝', 'Private Journal', 'Write private journal entries in a safe, secure personal space.', 'warning'),
+                ('⏱️', 'Mood Tracker', 'Log your daily moods and build a complete picture of your emotional health.', 'danger'),
+                ('💡', 'Recommendations', 'Personalized wellness tips including meditation, exercise, and sleep advice.', 'secondary'),
+                ('📖', 'Daily Quotes', 'Start each session with an inspiring motivational quote.', 'primary'),
+                ('🆘', 'Emergency Support', 'Quick access to crisis resources and professional help when you need it most.', 'danger'),
+            ] %}
+            {% for icon, title, desc, color in features %}
+            <div class="col-md-6 col-lg-3">
+                <div class="feature-card h-100">
+                    <div class="feature-icon-wrap bg-{{ color }} bg-opacity-10">
+                        <span class="feature-icon">{{ icon }}</span>
+                    </div>
+                    <h5 class="feature-title">{{ title }}</h5>
+                    <p class="feature-desc">{{ desc }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ── Emotions Section ───────────────────────────────────────────────── -->
+<section class="py-5 section-emotions">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="section-eyebrow">Emotion Detection</span>
+            <h2 class="section-title">We Understand <span class="text-primary">5 Core Emotions</span></h2>
+        </div>
+        <div class="row justify-content-center g-3">
+            {% for em, data in [
+                ('😊', 'Happy', 'Joyful moments and positive feelings', '#28a745'),
+                ('😢', 'Sad', 'Times of grief, loss, or low mood', '#6c757d'),
+                ('😰', 'Stressed', 'Anxiety, pressure, and overwhelm', '#fd7e14'),
+                ('😠', 'Angry', 'Frustration and intense emotions', '#dc3545'),
+                ('😐', 'Neutral', 'Calm, balanced, indifferent states', '#17a2b8'),
+            ] %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="emotion-pill text-center p-3 rounded-4">
+                    <div class="emotion-emoji-large">{{ em }}</div>
+                    <div class="fw-bold mt-2">{{ data }}</div>
+                    <div class="text-muted small">{{ loop.cycle('Joyful moments and positive feelings', 'Times of grief, loss, or low mood', 'Anxiety, pressure, and overwhelm', 'Frustration and intense emotions', 'Calm, balanced, indifferent states') }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- ── How It Works ───────────────────────────────────────────────────── -->
+<section id="how-it-works" class="py-5 section-light">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="section-eyebrow">Simple & Easy</span>
+            <h2 class="section-title">How <span class="text-primary">MindCare AI</span> Works</h2>
+        </div>
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+                <div class="steps-container">
+                    {% set steps = [
+                        ('Create Account', 'Sign up for free in under 60 seconds. Your data stays private and secure.', 'bi-person-plus-fill', 'primary'),
+                        ('Express Yourself', 'Type how you are feeling in plain English. No jargon needed.', 'bi-pencil-fill', 'success'),
+                        ('AI Analysis', 'Our ML model analyzes your text and identifies your emotional state.', 'bi-cpu-fill', 'info'),
+                        ('Get Insights', 'Receive personalized recommendations, track your progress, and grow.', 'bi-graph-up-arrow', 'warning'),
+                    ] %}
+                    {% for title, desc, icon, color in steps %}
+                    <div class="step-item d-flex gap-4 mb-4">
+                        <div class="step-icon-wrap bg-{{ color }} bg-opacity-15 text-{{ color }}">
+                            <i class="bi {{ icon }} fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ loop.index }}. {{ title }}</h5>
+                            <p class="text-muted mb-0">{{ desc }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="tech-card p-4 rounded-4">
+                    <h5 class="fw-bold mb-4">🤖 Technology Stack</h5>
+                    <div class="row g-3 text-center">
+                        {% for tech, desc, icon in [
+                            ('TF-IDF', 'Text Vectorization', 'bi-braces'),
+                            ('Logistic Regression', 'Classifier', 'bi-diagram-3'),
+                            ('Flask', 'Web Framework', 'bi-server'),
+                            ('SQLite', 'Database', 'bi-database'),
+                            ('Chart.js', 'Analytics', 'bi-pie-chart'),
+                            ('Bootstrap 5', 'UI Framework', 'bi-palette'),
+                        ] %}
+                        <div class="col-4">
+                            <div class="tech-pill">
+                                <i class="bi {{ icon }} text-primary mb-1"></i>
+                                <div class="fw-semibold small">{{ tech }}</div>
+                                <div class="text-muted" style="font-size:0.7rem">{{ desc }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── CTA Section ────────────────────────────────────────────────────── -->
+<section class="cta-section py-5">
+    <div class="container text-center py-4">
+        <h2 class="text-white fw-bold mb-3">Ready to Start Your Wellness Journey?</h2>
+        <p class="text-white-50 mb-4">Join thousands of users who track their mental health with MindCare AI.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary">
+                <i class="bi bi-heart-pulse me-2"></i>Get Started Free
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                Already have an account? Login →
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
