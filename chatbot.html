@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+{% block title %}Wellness Chatbot{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <div style="font-size:3rem">💬</div>
+                <h2 class="fw-bold">Wellness Chat Assistant</h2>
+                <p class="text-muted">I'm here to listen and support you. Express yourself freely.</p>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="alert alert-info py-2 small mb-4 rounded-3">
+                <i class="bi bi-robot me-2"></i>
+                <strong>Note:</strong> I am an AI wellness assistant, <strong>not</strong> a therapist or doctor. 
+                For crisis support, please <a href="{{ url_for('emergency') }}" class="alert-link">click here</a>.
+            </div>
+
+            <!-- Chat Window -->
+            <div class="chat-container" id="chatContainer">
+                <!-- Welcome Message -->
+                <div class="chat-bubble chat-bot mb-3">
+                    <div class="chat-avatar-bot">🤖</div>
+                    <div class="chat-text-wrap">
+                        <div class="chat-bubble-text">
+                            Hello {{ session.user_name.split()[0] }}! 👋 I'm your MindCare AI wellness assistant.<br><br>
+                            How are you feeling today? You can tell me anything — I'm here to listen without judgment. 💙
+                        </div>
+                        <div class="chat-time">{{ "now" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Prompts -->
+            <div class="quick-prompts mb-3">
+                <small class="text-muted fw-semibold me-2">Quick prompts:</small>
+                {% for prompt in ["I feel lonely", "I'm stressed out", "I can't sleep", "I failed my exam", "I'm feeling happy!"] %}
+                <button class="btn btn-outline-secondary btn-sm rounded-pill quick-prompt-btn" onclick="sendQuick('{{ prompt }}')">
+                    {{ prompt }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-input-area">
+                <div class="input-group rounded-pill shadow-sm border overflow-hidden">
+                    <input type="text" id="chatInput" class="form-control border-0"
+                        placeholder="Type your message..." maxlength="500"
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="btn btn-primary px-4" onclick="sendMessage()" id="sendBtn">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-muted">Press Enter or click Send</small>
+                    <small class="text-muted"><span id="chatCharCount">0</span>/500</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let messageCount = 0;
+
+function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function addMessage(text, isUser) {
+    const container = document.getElementById('chatContainer');
+    const div = document.createElement('div');
+    div.className = `chat-bubble ${isUser ? 'chat-user' : 'chat-bot'} mb-3 animate-fade-in`;
+
+    if (isUser) {
+        div.innerHTML = `
+            <div class="chat-text-wrap text-end">
+                <div class="chat-bubble-text chat-user-text">${escapeHTML(text)}</div>
+                <div class="chat-time">${getCurrentTime()}</div>
+            </div>
+            <div class="chat-avatar-user">{{ session.user_name[0].upper() }}</div>
+        `;
+    } else {
+        div.innerHTML = `
+            <div class="chat-avatar-bot">🤖</div>
+            <div class="chat-text-wrap">
+                <div class="chat-bubble-text">${text}</div>
+                <div class="chat-time">${getCurrentTime()}</div>
+            </div>
+        `;
+    }
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    messageCount++;
+
+    // Suggest professional help after 5 messages
+    if (messageCount === 5) {
+        setTimeout(() => {
+            addMessage("Just a reminder — I'm an AI assistant and have limitations. If you need real support, please consider speaking with a mental health professional. 💙", false);
+        }, 1000);
+    }
+}
+
+function addTypingIndicator() {
+    const container = document.getElementById('chatContainer');
+    const div = document.createElement('div');
+    div.className = 'chat-bubble chat-bot mb-3';
+    div.id = 'typingIndicator';
+    div.innerHTML = `
+        <div class="chat-avatar-bot">🤖</div>
+        <div class="chat-text-wrap">
+            <div class="typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const ind = document.getElementById('typingIndicator');
+    if (ind) ind.remove();
+}
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, true);
+    input.value = '';
+    document.getElementById('chatCharCount').textContent = '0';
+
+    // Disable button
+    document.getElementById('sendBtn').disabled = true;
+    addTypingIndicator();
+
+    try {
+        const resp = await fetch('{{ url_for("chatbot_message") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        });
+        const data = await resp.json();
+        setTimeout(() => {
+            removeTypingIndicator();
+            addMessage(data.response, false);
+            document.getElementById('sendBtn').disabled = false;
+        }, 800 + Math.random() * 700);
+    } catch (e) {
+        removeTypingIndicator();
+        addMessage("Sorry, I couldn't process that. Please try again. 🙏", false);
+        document.getElementById('sendBtn').disabled = false;
+    }
+}
+
+function sendQuick(text) {
+    document.getElementById('chatInput').value = text;
+    sendMessage();
+}
+
+document.getElementById('chatInput').addEventListener('input', function() {
+    document.getElementById('chatCharCount').textContent = this.value.length;
+});
+</script>
+{% endblock %}
