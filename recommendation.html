@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+{% block title %}Wellness Recommendations{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div style="font-size:3rem">💡</div>
+        <h2 class="fw-bold mt-2">Your Wellness Recommendations</h2>
+        <p class="text-muted">Personalized suggestions based on your recent emotional state.</p>
+    </div>
+
+    <!-- Current Mood Context -->
+    <div class="text-center mb-4">
+        <div class="current-mood-pill d-inline-flex align-items-center gap-3 px-5 py-3 rounded-pill shadow-sm">
+            <span style="font-size:2rem">{{ emotion_info.emoji }}</span>
+            <div class="text-start">
+                <div class="small text-muted">Based on your recent mood</div>
+                <div class="fw-bold fs-5" style="color: {{ emotion_info.color }}">{{ emotion_info.label }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Grid -->
+    <div class="row g-3 mb-5">
+        {% for rec in recommendations %}
+        <div class="col-md-6 col-lg-4">
+            <div class="rec-card-full h-100 p-4 rounded-4 shadow-sm border-0">
+                <div class="rec-icon-large mb-3">{{ rec.icon }}</div>
+                <h5 class="fw-bold">{{ rec.title }}</h5>
+                <p class="text-muted mb-0">{{ rec.desc }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- All Emotion Tips -->
+    <div class="mb-4">
+        <h4 class="fw-bold mb-1">Explore All Wellness Tips</h4>
+        <p class="text-muted">Browse recommendations for every emotional state.</p>
+    </div>
+
+    <!-- Tabs for all emotions -->
+    <ul class="nav nav-pills mb-4 gap-2 flex-wrap" id="recTabs" role="tablist">
+        {% for em, recs_list in all_recs.items() %}
+        {% set info = emotion_data[em] %}
+        <li class="nav-item">
+            <button class="nav-link {% if em == emotion %}active{% endif %} rounded-pill"
+                id="tab-{{ em }}" data-bs-toggle="pill" data-bs-target="#pane-{{ em }}" type="button">
+                {{ info.emoji }} {{ info.label }}
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="tab-content" id="recTabContent">
+        {% for em, recs_list in all_recs.items() %}
+        <div class="tab-pane fade {% if em == emotion %}show active{% endif %}" id="pane-{{ em }}">
+            <div class="row g-3">
+                {% for rec in recs_list %}
+                <div class="col-md-6">
+                    <div class="rec-card h-100">
+                        <div class="rec-icon">{{ rec.icon }}</div>
+                        <div>
+                            <div class="fw-bold">{{ rec.title }}</div>
+                            <div class="text-muted small">{{ rec.desc }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Breathing Exercise Widget -->
+    <div class="breathing-widget mt-5 p-5 rounded-4 text-center">
+        <h4 class="fw-bold mb-2">🌬️ Quick Breathing Exercise</h4>
+        <p class="text-muted mb-4">Box Breathing — reduces stress in just 2 minutes.</p>
+        <div class="breath-circle" id="breathCircle">
+            <div class="breath-text" id="breathText">Press Start</div>
+        </div>
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <button class="btn btn-primary rounded-pill px-4" id="breathBtn" onclick="startBreathing()">
+                <i class="bi bi-play-fill me-2"></i>Start
+            </button>
+            <button class="btn btn-outline-secondary rounded-pill px-4" onclick="stopBreathing()" id="stopBtn" style="display:none">
+                <i class="bi bi-stop-fill me-2"></i>Stop
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let breathInterval = null;
+let breathStep = 0;
+const steps = [
+    { text: 'Inhale...', duration: 4000, color: '#0d6efd' },
+    { text: 'Hold...', duration: 4000, color: '#6f42c1' },
+    { text: 'Exhale...', duration: 4000, color: '#198754' },
+    { text: 'Hold...', duration: 4000, color: '#fd7e14' },
+];
+
+function startBreathing() {
+    document.getElementById('breathBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    runStep();
+}
+
+function runStep() {
+    const step = steps[breathStep % steps.length];
+    const circle = document.getElementById('breathCircle');
+    const text = document.getElementById('breathText');
+    text.textContent = step.text;
+    circle.style.borderColor = step.color;
+    circle.style.boxShadow = `0 0 30px ${step.color}40`;
+    breathStep++;
+    breathInterval = setTimeout(runStep, step.duration);
+}
+
+function stopBreathing() {
+    clearTimeout(breathInterval);
+    document.getElementById('breathBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('breathText').textContent = 'Press Start';
+    document.getElementById('breathCircle').style.borderColor = '';
+    document.getElementById('breathCircle').style.boxShadow = '';
+    breathStep = 0;
+}
+</script>
+{% endblock %}
