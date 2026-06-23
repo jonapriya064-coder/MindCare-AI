@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block title %}Emergency Support{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Emergency Header -->
+    <div class="emergency-header text-center py-5 mb-4 rounded-4">
+        <div style="font-size:4rem">🆘</div>
+        <h1 class="fw-bold text-white mt-3">You Are Not Alone</h1>
+        <p class="text-white-75 fs-5 mb-0">If you're in crisis or need immediate help, please reach out now.</p>
+    </div>
+
+    <!-- Immediate Help -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="alert alert-danger rounded-4 p-4 shadow-sm">
+                <h4 class="fw-bold text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    If you are in immediate danger or considering self-harm, please call emergency services NOW.
+                </h4>
+                <a href="tel:112" class="btn btn-danger btn-lg rounded-pill me-3 mt-2">
+                    <i class="bi bi-telephone-fill me-2"></i>Call 112 (Emergency)
+                </a>
+                <a href="tel:911" class="btn btn-outline-danger btn-lg rounded-pill mt-2">
+                    <i class="bi bi-telephone-fill me-2"></i>Call 911 (US)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crisis Helplines -->
+    <h3 class="fw-bold mb-4"><i class="bi bi-telephone-fill text-danger me-2"></i>Crisis Helplines</h3>
+    <div class="row g-3 mb-5">
+        {% for country, number, desc, flag in [
+            ('India - iCall', '9152987821', 'Mon–Sat, 8am–10pm IST', '🇮🇳'),
+            ('India - Vandrevala', '1860-2662-345', '24/7 Mental Health Helpline', '🇮🇳'),
+            ('USA - NAMI', '1-800-950-6264', 'Mon–Fri, 10am–10pm ET', '🇺🇸'),
+            ('USA - Crisis Text Line', 'Text HOME to 741741', 'Free 24/7 Crisis Counseling', '🇺🇸'),
+            ('International - Befrienders', 'befrienders.org', 'Find local crisis support worldwide', '🌍'),
+            ('UK - Samaritans', '116 123', 'Free 24/7 Emotional Support', '🇬🇧'),
+        ] %}
+        <div class="col-md-6 col-lg-4">
+            <div class="helpline-card h-100 p-4 rounded-4 shadow-sm border-0">
+                <div class="d-flex align-items-start gap-3">
+                    <span style="font-size:2rem">{{ flag }}</span>
+                    <div>
+                        <h6 class="fw-bold mb-1">{{ country }}</h6>
+                        <div class="text-danger fw-bold fs-6 mb-1">{{ number }}</div>
+                        <small class="text-muted">{{ desc }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- What to Do Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 text-primary">
+                        <i class="bi bi-lightbulb-fill me-2"></i>If You're Feeling Overwhelmed
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        {% for tip in [
+                            'Take 5 slow, deep breaths right now.',
+                            'Call or text someone you trust.',
+                            'Go to a safe, calm environment.',
+                            'Try the 5-4-3-2-1 grounding technique.',
+                            'Write your feelings in a journal.',
+                            'Remember: this feeling is temporary.',
+                            'Avoid alcohol or other substances.',
+                            'Contact a crisis helpline above.',
+                        ] %}
+                        <li class="mb-2 d-flex align-items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-success mt-1"></i>
+                            <span>{{ tip }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3 text-success">
+                        <i class="bi bi-heart-fill me-2"></i>Grounding Technique (5-4-3-2-1)
+                    </h5>
+                    <p class="text-muted small mb-3">Focus on the present moment by identifying:</p>
+                    <div class="d-grid gap-2">
+                        {% for num, sense, example in [
+                            ('5', 'Things You Can SEE', 'a chair, window, your hands...'),
+                            ('4', 'Things You Can TOUCH', 'your desk, your clothing...'),
+                            ('3', 'Things You Can HEAR', 'birds, breathing, traffic...'),
+                            ('2', 'Things You Can SMELL', 'air, food, coffee...'),
+                            ('1', 'Thing You Can TASTE', 'toothpaste, a drink...'),
+                        ] %}
+                        <div class="d-flex align-items-center gap-3 p-2 rounded-3 bg-success bg-opacity-5">
+                            <div class="grounding-num bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                style="width:36px;height:36px;min-width:36px">{{ num }}</div>
+                            <div>
+                                <div class="fw-semibold small">{{ sense }}</div>
+                                <div class="text-muted" style="font-size:.75rem">e.g. {{ example }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important Disclaimer -->
+    <div class="card bg-warning bg-opacity-10 border-warning border-opacity-50 rounded-4 p-4">
+        <h5 class="fw-bold text-warning mb-2">
+            <i class="bi bi-exclamation-triangle me-2"></i>Important Disclaimer
+        </h5>
+        <p class="mb-0 text-muted">
+            MindCare AI is an <strong>educational wellness tool</strong>, not a substitute for professional mental health care.
+            The resources on this page are for informational purposes. Please always consult a qualified mental health professional
+            for diagnosis, treatment, or medical advice. If you are in immediate danger, call emergency services immediately.
+        </p>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-4">
+        {% if session.user_id %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary rounded-pill px-5">
+            <i class="bi bi-house me-2"></i>Back to Dashboard
+        </a>
+        {% else %}
+        <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill px-5">
+            <i class="bi bi-house me-2"></i>Back to Home
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
