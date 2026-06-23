@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+{% block title %}Analysis Result{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- Emergency Warning Banner -->
+            {% if show_emergency %}
+            <div class="alert alert-danger border-danger rounded-4 mb-4 shadow-sm">
+                <div class="d-flex gap-3 align-items-start">
+                    <span style="font-size:2rem">🆘</span>
+                    <div>
+                        <h5 class="fw-bold text-danger mb-1">We're Concerned About You</h5>
+                        <p class="mb-2">You've been logging several negative emotions. You don't have to go through this alone.</p>
+                        <a href="{{ url_for('emergency') }}" class="btn btn-danger rounded-pill me-2">
+                            <i class="bi bi-telephone-fill me-1"></i>Get Emergency Support
+                        </a>
+                        <a href="{{ url_for('chatbot') }}" class="btn btn-outline-danger rounded-pill">
+                            <i class="bi bi-chat-heart me-1"></i>Talk to AI Assistant
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Main Result Card -->
+            <div class="result-card mb-4" style="--emotion-color: {{ emotion_info.color }}">
+                <div class="result-header text-center py-4" style="background: {{ emotion_info.color }}15">
+                    <div class="result-emoji">{{ emotion_info.emoji }}</div>
+                    <h2 class="fw-bold mt-2" style="color: {{ emotion_info.color }}">{{ emotion_info.label }}</h2>
+                    <p class="text-muted mb-0">{{ emotion_info.description }}</p>
+                </div>
+
+                <!-- Confidence Score -->
+                <div class="px-4 py-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold">Confidence Score</span>
+                        <span class="fw-bold" style="color: {{ emotion_info.color }}">{{ confidence }}%</span>
+                    </div>
+                    <div class="progress rounded-pill" style="height: 12px">
+                        <div class="progress-bar rounded-pill" role="progressbar"
+                            style="width: {{ confidence }}%; background: {{ emotion_info.color }}"
+                            aria-valuenow="{{ confidence }}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Text -->
+                <div class="px-4 pb-3">
+                    <label class="form-label text-muted small fw-semibold">YOUR INPUT</label>
+                    <div class="input-preview p-3 rounded-3 bg-light">
+                        "{{ text }}"
+                    </div>
+                </div>
+
+                <!-- All Emotion Probabilities -->
+                <div class="px-4 pb-4">
+                    <label class="form-label text-muted small fw-semibold">EMOTION BREAKDOWN</label>
+                    <div class="row g-2">
+                        {% set em_icons = {'happy': '😊', 'sad': '😢', 'stress': '😰', 'angry': '😠', 'neutral': '😐'} %}
+                        {% set em_colors = {'happy': '#28a745', 'sad': '#6c757d', 'stress': '#fd7e14', 'angry': '#dc3545', 'neutral': '#17a2b8'} %}
+                        {% for em, prob in all_probs.items() | sort(attribute='1', reverse=True) %}
+                        <div class="col-12">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="width:24px">{{ em_icons.get(em, '😐') }}</span>
+                                <span class="small fw-semibold text-capitalize" style="width:70px">{{ em }}</span>
+                                <div class="flex-grow-1 progress rounded-pill" style="height:8px">
+                                    <div class="progress-bar rounded-pill" style="width:{{ prob }}%; background:{{ em_colors.get(em, '#6c757d') }}"></div>
+                                </div>
+                                <span class="small text-muted" style="width:42px">{{ prob }}%</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <h5 class="fw-bold mb-3"><i class="bi bi-stars text-warning me-2"></i>Personalized Recommendations</h5>
+            <div class="row g-3 mb-4">
+                {% for rec in recommendations %}
+                <div class="col-md-6">
+                    <div class="rec-card h-100">
+                        <div class="rec-icon">{{ rec.icon }}</div>
+                        <div>
+                            <div class="fw-bold">{{ rec.title }}</div>
+                            <div class="text-muted small">{{ rec.desc }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a href="{{ url_for('analyze') }}" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-arrow-repeat me-2"></i>Analyze Again
+                </a>
+                <a href="{{ url_for('chatbot') }}" class="btn btn-success rounded-pill px-4">
+                    <i class="bi bi-chat-heart me-2"></i>Talk to AI
+                </a>
+                <a href="{{ url_for('history') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-clock-history me-2"></i>View History
+                </a>
+                <a href="{{ url_for('analytics') }}" class="btn btn-outline-info rounded-pill px-4">
+                    <i class="bi bi-bar-chart me-2"></i>Analytics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
