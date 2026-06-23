@@ -1,0 +1,105 @@
+{% extends "layout.html" %}
+{% block title %}My Journal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row g-4">
+
+        <!-- Write Journal -->
+        <div class="col-lg-5">
+            <div class="sticky-top" style="top: 80px">
+                <div class="text-center mb-4">
+                    <div style="font-size:2.5rem">✍️</div>
+                    <h3 class="fw-bold mt-2">My Journal</h3>
+                    <p class="text-muted">Your private space to write freely and reflect.</p>
+                </div>
+
+                <div class="card border-0 shadow rounded-4 p-4">
+                    <form method="POST" action="{{ url_for('journal') }}">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Title <span class="text-muted small">(optional)</span></label>
+                            <input type="text" name="title" class="form-control rounded-3" placeholder="Today's thoughts...">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-lock-fill text-success me-1"></i>Entry <span class="text-muted small">(private)</span>
+                            </label>
+                            <textarea name="text" class="form-control rounded-3" rows="8"
+                                placeholder="Write your thoughts, feelings, reflections..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 py-2 fw-bold rounded-3 text-dark">
+                            <i class="bi bi-journal-plus me-2"></i>Save Entry
+                        </button>
+                    </form>
+                </div>
+
+                <div class="alert alert-success small mt-3 rounded-3 py-2">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    Your journal entries are <strong>private</strong> and stored securely. Only you can see them.
+                </div>
+            </div>
+        </div>
+
+        <!-- Journal Entries -->
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-journals text-warning me-2"></i>
+                    Your Entries <span class="badge bg-warning text-dark rounded-pill">{{ entries|length }}</span>
+                </h5>
+            </div>
+
+            {% if entries %}
+            <div class="journal-list">
+                {% for entry in entries %}
+                <div class="journal-entry-card mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0">
+                                {{ entry['title'] or 'Untitled Entry' }}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i>{{ entry['date'][:10] }}
+                                &nbsp;
+                                <i class="bi bi-clock me-1"></i>{{ entry['date'][11:16] }}
+                            </small>
+                        </div>
+                        <form method="POST" action="{{ url_for('delete_journal', entry_id=entry['id']) }}"
+                            onsubmit="return confirm('Delete this journal entry?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Delete">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="journal-text" id="jtext-{{ entry['id'] }}">
+                        {{ entry['text'][:200] }}{% if entry['text']|length > 200 %}<span class="more-text" style="display:none">{{ entry['text'][200:] }}</span>
+                        <button class="btn btn-link btn-sm text-primary p-0 ms-1 read-more-btn" onclick="toggleMore({{ entry['id'] }})">Read more</button>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div style="font-size:4rem">📔</div>
+                <h5 class="mt-3 fw-bold">No Journal Entries Yet</h5>
+                <p class="text-muted">Start writing your first entry using the form on the left.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMore(id) {
+    const more = document.querySelector(`#jtext-${id} .more-text`);
+    const btn = document.querySelector(`#jtext-${id} .read-more-btn`);
+    if (more.style.display === 'none') {
+        more.style.display = 'inline';
+        btn.textContent = 'Read less';
+    } else {
+        more.style.display = 'none';
+        btn.textContent = 'Read more';
+    }
+}
+</script>
+{% endblock %}
