@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+
+    <!-- ── Greeting Header ─────────────────────────────────────────── -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col">
+                <h4 class="fw-bold mb-1">
+                    {% set hour = now.hour %}
+                    {% if hour < 12 %}🌅 Good Morning{% elif hour < 17 %}☀️ Good Afternoon{% else %}🌙 Good Evening{% endif %},
+                    {{ session.user_name.split()[0] }}!
+                </h4>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-calendar3 me-1"></i>
+                    {{ now.strftime('%A, %B %d, %Y') }}
+                </p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('analyze') }}" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-search-heart me-2"></i>Analyze My Mood
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Daily Quote ────────────────────────────────────────────── -->
+    <div class="quote-card mb-4">
+        <div class="quote-icon">💬</div>
+        <div>
+            <p class="quote-text mb-1">"{{ quote.quote }}"</p>
+            <small class="text-muted">— {{ quote.author }}</small>
+        </div>
+    </div>
+
+    <!-- ── Stats Cards ────────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-primary bg-opacity-10 border-primary-subtle">
+                <div class="stat-card-icon text-primary"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-card-value text-primary">{{ total_entries }}</div>
+                <div class="stat-card-label">Total Moods</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-success bg-opacity-10 border-success-subtle">
+                <div class="stat-card-icon text-success"><i class="bi bi-calendar-check"></i></div>
+                <div class="stat-card-value text-success">{{ today_count }}</div>
+                <div class="stat-card-label">Today's Entries</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-warning bg-opacity-10 border-warning-subtle">
+                <div class="stat-card-icon text-warning"><i class="bi bi-journal-text"></i></div>
+                <div class="stat-card-value text-warning">{{ journal_count }}</div>
+                <div class="stat-card-label">Journal Entries</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card bg-info bg-opacity-10 border-info-subtle">
+                <div class="stat-card-icon text-info"><i class="bi bi-emoji-smile"></i></div>
+                <div class="stat-card-value text-info">
+                    {% if recent_moods %}{{ emotion_data[recent_moods[0]['emotion']]['emoji'] }}{% else %}–{% endif %}
+                </div>
+                <div class="stat-card-label">Latest Mood</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Quick Navigation ───────────────────────────────────────── -->
+    <h5 class="fw-bold mb-3">Quick Actions</h5>
+    <div class="row g-3 mb-4">
+        {% set nav_items = [
+            (url_for('analyze'), '🔍', 'Analyze Mood', 'Detect emotions from your text', 'primary'),
+            (url_for('chatbot'), '💬', 'Chat Assistant', 'Talk to your wellness companion', 'success'),
+            (url_for('history'), '📅', 'Mood History', 'Review your past mood logs', 'info'),
+            (url_for('journal'), '✍️', 'My Journal', 'Write your private thoughts', 'warning'),
+            (url_for('analytics'), '📊', 'Analytics', 'Visualize your mood patterns', 'secondary'),
+            (url_for('recommendations'), '💡', 'Wellness Tips', 'Get personalized recommendations', 'danger'),
+        ] %}
+        {% for href, icon, title, desc, color in nav_items %}
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ href }}" class="quick-nav-card text-decoration-none h-100">
+                <div class="qnc-icon bg-{{ color }} bg-opacity-15">{{ icon }}</div>
+                <div class="qnc-title">{{ title }}</div>
+                <div class="qnc-desc">{{ desc }}</div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ── Recent Mood History ────────────────────────────────────── -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i>Recent Moods</h6>
+                    <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+                </div>
+                <div class="card-body px-4">
+                    {% if recent_moods %}
+                    <div class="mood-list">
+                        {% for mood in recent_moods %}
+                        {% set info = emotion_data[mood['emotion']] %}
+                        <div class="mood-list-item">
+                            <span class="mood-emoji-sm">{{ info['emoji'] }}</span>
+                            <div class="mood-details">
+                                <span class="fw-semibold">{{ info['label'] }}</span>
+                                <small class="text-muted d-block">{{ mood['date'][:16] }}</small>
+                                {% if mood['journal'] %}
+                                <small class="text-muted text-truncate d-block" style="max-width:300px">{{ mood['journal'] }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="mood-badge badge rounded-pill" style="background:{{ info['color'] }}20; color:{{ info['color'] }}">
+                                {{ info['label'] }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <div style="font-size:3rem">📭</div>
+                        <p class="mt-2">No mood entries yet.</p>
+                        <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm rounded-pill">Log Your First Mood</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <!-- Emergency Notice -->
+            <div class="card border-0 shadow-sm rounded-4 border-danger-subtle mb-3">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-danger mb-2"><i class="bi bi-heart-pulse me-2"></i>Mental Health Support</h6>
+                    <p class="text-muted small mb-3">Remember: MindCare AI is an educational tool. If you're struggling, please reach out to a professional.</p>
+                    <a href="{{ url_for('emergency') }}" class="btn btn-danger btn-sm w-100 rounded-3">
+                        <i class="bi bi-telephone-fill me-2"></i>Emergency Resources
+                    </a>
+                </div>
+            </div>
+            <!-- Wellness Tip -->
+            <div class="card border-0 shadow-sm rounded-4 bg-success bg-opacity-5">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-success mb-2"><i class="bi bi-lightbulb me-2"></i>Wellness Tip of the Day</h6>
+                    {% set tips = [
+                        "Practice the 5-4-3-2-1 grounding technique to reduce anxiety.",
+                        "Try to drink 8 glasses of water today — hydration affects mood!",
+                        "A 10-minute walk outside can boost your serotonin levels.",
+                        "Write 3 things you're grateful for to shift your mindset.",
+                        "Take 3 deep breaths right now. Inhale 4s, hold 4s, exhale 6s.",
+                    ] %}
+                    <p class="text-muted small mb-3">{{ tips | random }}</p>
+                    <a href="{{ url_for('recommendations') }}" class="btn btn-success btn-sm rounded-3">
+                        <i class="bi bi-stars me-2"></i>See All Tips
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
